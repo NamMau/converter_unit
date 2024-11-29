@@ -1,7 +1,6 @@
 package com.example.converter;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,74 +17,80 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize the spinners
-        Spinner fromUnitSpinner = findViewById(R.id.fromUnitSpinner);
-        Spinner toUnitSpinner = findViewById(R.id.toUnitSpinner);
+        // Gắn kết Spinner cho các đơn vị
+        Spinner spinnerFromUnit = findViewById(R.id.fromUnitSpinner);
+        Spinner spinnerToUnit = findViewById(R.id.toUnitSpinner);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                new String[]{"Metre", "Millimetre", "Mile", "Foot"});
+        // Dữ liệu cho Spinner
+        String[] units = {"Meter", "Millimeter", "Mile", "Foot"};
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, units);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        fromUnitSpinner.setAdapter(adapter);
-        toUnitSpinner.setAdapter(adapter);
+        spinnerFromUnit.setAdapter(adapter);
+        spinnerToUnit.setAdapter(adapter);
 
-        // Get references to UI components
-        EditText valueEditText = findViewById(R.id.valueEditText);
-        Button convertButton = findViewById(R.id.convertButton);
-        TextView resultTextView = findViewById(R.id.resultTextView);
+        // Gắn kết các thành phần giao diện khác
+        EditText editTextValue = findViewById(R.id.valueEditText);
+        Button buttonConvert = findViewById(R.id.convertButton);
+        TextView textViewResult = findViewById(R.id.resultTextView);
 
-        // Set up button click listener
-        // Set up button click listener
-        convertButton.setOnClickListener(v -> {
-            // Get input value and selected units
-            String valueString = valueEditText.getText().toString();
-            if (valueString.isEmpty()) {
-                Toast.makeText(this, "Please enter a value", Toast.LENGTH_SHORT).show();
+        // Xử lý sự kiện nhấn nút Convert
+        buttonConvert.setOnClickListener(v -> {
+            String inputValue = editTextValue.getText().toString();
+
+            if (inputValue.isEmpty()) {
+                Toast.makeText(MainActivity.this, "Please enter the value!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            double value = Double.parseDouble(valueString);
-            String fromUnit = fromUnitSpinner.getSelectedItem().toString();
-            String toUnit = toUnitSpinner.getSelectedItem().toString();
+            try {
+                double value = Double.parseDouble(inputValue);
+                String fromUnit = spinnerFromUnit.getSelectedItem().toString();
+                String toUnit = spinnerToUnit.getSelectedItem().toString();
 
-            // Perform conversion
-            double result = convertLength(value, fromUnit, toUnit);
+                // Tính toán chuyển đổi
+                double result = convertUnits(value, fromUnit, toUnit);
 
-            // Display result with 6 decimal places
-            resultTextView.setText(String.format("Result: %.6f %s", result, toUnit));
+                // Hiển thị kết quả
+                textViewResult.setText(String.format("Result: %.1f %s", result, toUnit));
+            } catch (NumberFormatException e) {
+                Toast.makeText(MainActivity.this, "Invalid valid!", Toast.LENGTH_SHORT).show();
+            }
         });
-
     }
 
-    private double convertLength(double value, String fromUnit, String toUnit) {
-        double meters = 0;
+    // Hàm chuyển đổi đơn vị
+    private double convertUnits(double value, String fromUnit, String toUnit) {
+        double valueInMeters = 0.0;
 
-        // Convert from input unit to meters
+        // From some value to metter
         switch (fromUnit) {
-            case "Metre":
-                meters = value;
+            case "Meter":
+                valueInMeters = value;
                 break;
-            case "Millimetre":
-                meters = value / 1000;
+            case "Millimeter":
+                valueInMeters = value / 1000.0;
                 break;
             case "Mile":
-                meters = value * 1609.34;
+                valueInMeters = value * 1609.34;
                 break;
             case "Foot":
-                meters = value * 0.3048;
+                valueInMeters = value * 0.3048;
                 break;
         }
 
-        // Convert from meters to output unit
+        // From metter to some values
         switch (toUnit) {
-            case "Metre":
-                return meters;
-            case "Millimetre":
-                return meters * 1000;
+            case "Meter":
+                return valueInMeters;
+            case "Millimeter":
+                return valueInMeters * 1000.0;
             case "Mile":
-                return meters / 1609.34;
+                return valueInMeters / 1609.34;
             case "Foot":
-                return meters / 0.3048;
+                return valueInMeters / 0.3048;
         }
-        return 0;
+
+        // Trường hợp không khớp đơn vị
+        return 0.0;
     }
 }
